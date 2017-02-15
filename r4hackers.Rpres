@@ -1,0 +1,198 @@
+```{r setup, include=FALSE}
+opts_chunk$set(cache=TRUE)
+#opts_chunk$set(out.width='750px', dpi=200)
+```
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+.midcenter {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+}
+.footer {
+    position: fixed; 
+    top: 90%;
+    text-align:right; 
+    width:90%;
+    margin-top:-150px;
+}
+.reveal section img {
+  border: 0px;
+  box-shadow: 0 0 0 0;
+}
+</style>
+
+
+R 4 Hackers
+========================================================
+author: 
+date: 
+autosize: true
+width: 1440
+incremental:true 
+
+Data Science Hello World
+========================================================
+
+We have some data...
+
+```{r, echo=FALSE}
+data(longley)
+library(ggplot2)
+library(GGally)
+library(dplyr)
+```
+
+
+```{r}
+head(longley)
+ggpairs(longley)
+```
+
+... what to do ~~first~~ second (after plotting) 
+
+Sure: linear models.
+
+```{r}
+fit <- lm(Employed ~ GNP, longley)
+```
+
+
+What can we do with this thing returned by lm?
+========================================================
+
+Just print it:
+
+```{r}
+# equivalently: print(fit)
+fit
+```
+
+If you've used lm before, you're probably used to doing this:
+
+```{r}
+summary(fit)
+```
+
+And we can use it to make predictions:
+
+```{r}
+predict(fit, newdata = data.frame(GNP = c(222, 223)))
+```
+
+
+We can plot it...
+
+```{r}
+# 
+plot(fit)
+```
+
+We can even do fancy stuff like extract the Akaike Information Criterion:
+
+```{r}
+extractAIC(fit)
+```
+
+
+
+Another one from the toolbox...
+========================================================
+
+
+
+The magic three: map, fold, and filter
+========================================================
+
+- function in, data out
+- ```map```: map a function over a list of elements
+    - in Haskell:
+
+```
+λ: map (+1) [1..10]
+[2,3,4,5,6,7,8,9,10,11]
+```
+
+- ```filter```: filter a list of elements according to some predicate
+    - in Haskell:
+
+```
+λ: filter even [1..10]
+[2,4,6,8,10]
+```
+
+- ```fold```: combine values recursively
+    - in Haskell:
+
+```
+λ: foldl (+) 0 [1..10]
+55
+```
+a.k.a. reduce (Clojure, Java, Python...), apply (Scheme, ...)
+
+
+Mapping in R: meet the family
+========================================================
+
+- apply, lapply, sapply, vapply, mapply, tapply ... ough
+- What data structure(s) am I working with?
+    - one-dimensional?
+    - more than one dimension?
+    - more than one data structure?
+
+
+The apply family (1): just apply 
+========================================================
+
+Use with more-than-one-dimensional data structures
+    - data.frame
+    - matrix
+    - array
+   
+```{r}
+data("women")
+# apply mean to the dataframe's columns 
+apply(women, 2, mean)
+```
+
+```{r}
+m <- matrix(1:12, nrow = 3, ncol = 4)
+m
+# apply mean to the rows
+apply(m, 1, mean)
+```
+
+
+The apply family (2): lapply and friends
+========================================================
+
+Use with one-dimensional stuff (list, vector)
+
+But which of [s|l|t]apply?
+
+lapply: outputs a list
+
+```{r}
+mychars <- c("a", "b", "c")
+str(lapply(mychars, toupper))
+```
+
+sapply: simplifies the result
+
+```{r}
+mychars <- c("a", "b", "c")
+str(sapply(mychars, toupper))
+```
+
+vapply: returns requested type
+
+```{r}
+mychars <- c("a", "b", "c")
+str(vapply(mychars, as.integer, integer(1)))
+```
+
+
+What's the problem with sapply?
+========================================================
