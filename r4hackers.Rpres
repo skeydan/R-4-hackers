@@ -96,6 +96,9 @@ We can even do fancy stuff like extract the Akaike Information Criterion:
 extractAIC(fit)
 ```
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+tbd another S3 object with these methods!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sw
 
 
 Another one from the toolbox...
@@ -196,3 +199,25 @@ str(vapply(mychars, as.integer, integer(1)))
 
 What's the problem with sapply?
 ========================================================
+
+
+
+Object types: class(), typeof(), mode() ... oh my!
+========================================================
+
+Just wanna use R? Use _class()_:
+
+```{r}
+myfunc <- function(x) x + 1
+tests1 <- c(`<-`, `c`, `if`, `[`, `length`, `sum`, `nrow`, myfunc)
+sapply(tests1, class)
+```
+
+For the user, these are all _functions_.
+Even though they do such different things as
+
+- assignment (x <- 1)
+- constructing new objects (x <- c(1,2))
+- branching (if)
+- 
+

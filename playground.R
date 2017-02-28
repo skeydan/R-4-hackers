@@ -1,19 +1,6 @@
 library(dplyr)
 library(purrr)
-
-##################### tbd ###########################
-
-# how to break lm
-#
-# object types, classes, etc. (overview)
-# 
-# functional programming
-# 
-# quote & co
-# 
-# OO systems
-
-##################### tbd ###########################
+require(stats)
 
 
 ### Object types ###
@@ -29,20 +16,39 @@ library(purrr)
 # type "symbol" is called mode "name".
 # type "language" is returned as "(" or "call".
 
-require(stats)
+# comparing typeof and mode
+# closure is used for distinguishing from primitives
+# A closure has three components, its formals, its body and its environment
+tests1 <- c(`expression`, `<-`, `c`, `if`, `call`, `[`, `length`, `sum`, `>`, `which`, `nrow`, `eval`)
+sapply(tests1, mode)
+sapply(tests1, typeof)
+sapply(tests1, print)
+#sapply(tests, class) # like mode
 
-sapply(options(), mode)
+# expressions and calls
+# an R expression vector is a list of calls, symbols etc, for example as returned by parse
+expression(1,2)
+eval(expression(1,2,3))
+# call returns an unevaluated function call, that is, an unevaluated expression which consists of the named function applied to the given arguments (name must be a quoted string which gives the name of a function to be called). Note that although the call is unevaluated, the arguments ... are evaluated.
+call("sum", 1,2)
+eval(call("sum", 1,2))
+# or use do.call (expects arguments in list)
+do.call("sum", list(1,2))
+# Objects of mode "list" can be coerced to mode "call"
+# the function argument must be a symbol
+as.call(list(`sum`, 1,2))
+eval(as.call(list(`sum`, 1,2)))
 
-cex3 <- c("1", "1:1", "1i", "list(1)", "data.frame(x = 1)",
-          "pairlist(pi)", "c", "lm", "formals(lm)[[1]]",  "formals(lm)[[2]]",
-          "y ~ x","expression((1))[[1]]", "(y ~ x)[[1]]",
-          "expression(x <- pi)[[1]][[1]]")
-lex3 <- sapply(cex3, function(x) eval(parse(text = x)))
-mex3 <- t(sapply(lex3,
-                 function(x) c(class(x), typeof(x), mode(x))))
-dimnames(mex3) <- list(cex3, c("class(.)", "typeof(.)","mode(.)"))
-mex3
+# language corresponds to basically all unevaluated object types other than constants or names
+tests2 <- c(y ~ x, expression(1+2), call("sum", 1,2), quote(x+1))
+sapply(tests2, mode)
+sapply(tests2, typeof)
+sapply(tests2, print)
 
+tests3 <- c(formals(lm)[[1]], quote(x))
+sapply(tests3, mode)
+sapply(tests3, typeof)
+sapply(tests3, print)
 
 ### substitute ###
 
