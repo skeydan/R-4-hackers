@@ -3,7 +3,7 @@ opts_chunk$set(cache=TRUE)
 #opts_chunk$set(out.width='750px', dpi=200)
 ```
 <style>
-.small-code pre code {
+.reveal pre code {
   font-size: 1em;
 }
 .midcenter {
@@ -25,11 +25,11 @@ opts_chunk$set(cache=TRUE)
 </style>
 
 
-R 4 Hackers
+R 4 hackers
 ========================================================
 author: 
 date: 
-autosize: true
+autosize: true 
 width: 1440
 incremental:true 
 
@@ -205,11 +205,12 @@ What's the problem with sapply?
 Object types: class(), typeof(), mode() ... oh my!
 ========================================================
 
+
 Just wanna use R? Use _class()_:
 
 ```{r}
 myfunc <- function(x) x + 1
-tests1 <- c(`<-`, `c`, `if`, `[`, `length`, `sum`, `nrow`, myfunc)
+tests1 <- c(`<-`, `if`, `[`, length, c, sum, nrow, eval, myfunc)
 sapply(tests1, class)
 ```
 
@@ -219,5 +220,61 @@ Even though they do such different things as
 - assignment (x <- 1)
 - constructing new objects (x <- c(1,2))
 - branching (if)
-- 
+
+
+typeof() tells about the internal object type:
+========================================================
+
+```{r}
+tests1 <- c(`<-`, `if`, `[`, length, c, sum, nrow, eval, myfunc)
+sapply(tests1, typeof)
+```
+
+So we have three different corresponding object types:
+
+- specials,
+- builtins, and
+- closures.
+
+
+Closures (1)
+========================================================
+
+Every user-defined function will be a closure.
+
+With closures, we can conveniently print the source code on the console:
+
+```{r}
+nrow
+```
+
+
+Closures (2)
+========================================================
+
+Closures have formals, a body, and an associated environment.
+
+```{r}
+c(formals(myfunc), body(myfunc), environment(myfunc))
+```
+
+
+Let's try this with eval!
+========================================================
+
+```{r}
+formals(eval)
+```
+
+```{r}
+body(eval)
+```
+
+Oops!
+
+####TBD###
+# eval = .Internal(eval(expr, envir, enclos))
+# .Internal = built into the R interpreter
+# names.c ---> show how lookup table looks...
+# eval.c show eval function!
 

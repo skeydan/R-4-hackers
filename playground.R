@@ -19,11 +19,16 @@ require(stats)
 # comparing typeof and mode
 # closure is used for distinguishing from primitives
 # A closure has three components, its formals, its body and its environment
-tests1 <- c(`expression`, `<-`, `c`, `if`, `call`, `[`, `length`, `sum`, `>`, `which`, `nrow`, `eval`)
+tests1 <- c(expression, `<-`, `c`, `if`, call, `[`, length, sum, `>`, which, nrow, eval)
 sapply(tests1, mode)
+sapply(tests1, class)
 sapply(tests1, typeof)
 sapply(tests1, print)
-#sapply(tests, class) # like mode
+
+# eval = .Internal(eval(expr, envir, enclos))
+# .Internal = built into the R interpreter
+# names.c ---> show how lookup table looks...
+# eval.c show eval function!
 
 # expressions and calls
 # an R expression vector is a list of calls, symbols etc, for example as returned by parse
