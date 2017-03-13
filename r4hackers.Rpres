@@ -1,8 +1,13 @@
 ```{r setup, include=FALSE}
 opts_chunk$set(cache=TRUE)
-#opts_chunk$set(out.width='750px', dpi=200)
+opts_chunk$set(out.width='700px', dpi=200)
+opts_chunk$set(fig.align='left')
+library(ggplot2)
+library(GGally)
+library(dplyr)
 ```
 <style>
+ 
 .reveal pre code {
   font-size: 1em;
 }
@@ -33,50 +38,81 @@ autosize: true
 width: 1440
 incremental:true 
 
-Data Science Hello World
+Hello World
 ========================================================
 
-We have some data...
+&nbsp;
 
-```{r, echo=FALSE}
+... that is, _Data Science Hello World_.
+
+
+
+We have some data!
+========================================================
+
+&nbsp;
+
+Sure, first we do data exploration ...
+
+```{r}
 data(longley)
-library(ggplot2)
-library(GGally)
-library(dplyr)
+head(longley)
 ```
 
 
+Sure, we visualize...
+========================================================
+
+&nbsp;
+
 ```{r}
-head(longley)
 ggpairs(longley)
 ```
 
-... what to do ~~first~~ second (after plotting) 
 
-Sure: linear models.
+And then: Hello World
+========================================================
+
+&nbsp;
+
+Linear models.
+
+&nbsp;  
 
 ```{r}
 fit <- lm(Employed ~ GNP, longley)
 ```
 
+&nbsp;
 
-What can we do with this thing returned by lm?
+Now what can we do with this thing returned by lm?
+
+
+Print it
 ========================================================
 
-Just print it:
+&nbsp;
 
 ```{r}
 # equivalently: print(fit)
 fit
 ```
 
-If you've used lm before, you're probably used to doing this:
+
+Output a summary
+========================================================
+
+&nbsp;
 
 ```{r}
 summary(fit)
 ```
 
-And we can use it to make predictions:
+
+Use it to make predictions
+========================================================
+
+&nbsp;
 
 ```{r}
 predict(fit, newdata = data.frame(GNP = c(222, 223)))
@@ -84,25 +120,170 @@ predict(fit, newdata = data.frame(GNP = c(222, 223)))
 
 
 We can plot it...
+========================================================
+
+&nbsp;
 
 ```{r}
-# 
+par(mfrow=c(2,2))
 plot(fit)
+par(mfrow=c(1,1))
 ```
 
-We can even do fancy stuff like extract the Akaike Information Criterion:
+
+... and even do some fancy stuff 
+========================================================
+
+&nbsp;
+
+... like extracting the Akaike Information Criterion
 
 ```{r}
 extractAIC(fit)
 ```
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-tbd another S3 object with these methods!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sw
+&nbsp;
+
+Let's see what other objects we can print, plot, get a summary of! 
 
 
-Another one from the toolbox...
+Data frames
 ========================================================
+
+&nbsp;
+
+```{r}
+df <- data.frame(x = 1:8, y = cumsum(rnorm(8)))
+df
+summary(df)
+```
+
+
+Data frames
+========================================================
+
+&nbsp;
+
+```{r}
+plot(df)
+```
+
+
+Time series objects
+========================================================
+
+&nbsp;
+
+```{r}
+ts <- ts(cumsum(round(rnorm(120), 2)), start = c(2004,12), frequency = 12)
+ts
+summary(ts)
+```
+
+
+Time series objects
+========================================================
+
+&nbsp;
+
+```{r}
+plot(ts)
+```
+
+
+Things we can get a summary of (but not plot) ...
+========================================================
+
+&nbsp;
+
+```{r}
+m <- matrix(1:10, nrow = 2)
+summary(m)
+```
+
+Things we can plot (but not get a summary of)
+========================================================
+
+&nbsp;
+
+```{r}
+plot(function(x) x^2, from = -2, to = 2)
+```
+
+
+What is going on?
+========================================================
+
+&nbsp;
+
+- R has several OO systems (on top of base (internal) objects)
+- the oldest and most widely used is S3
+
+
+S3 
+========================================================
+
+&nbsp;
+
+- generic function OO (instead of the more common message-passing OO)
+- methods belong to (generic) functions, not to classes!
+- _UseMethod()_ performs method dispatch
+
+```{r}
+print 
+```
+
+```{r}
+UseMethod
+```
+
+
+In S3, there are no formal class definitions
+========================================================
+
+&nbsp;
+
+```{r} 
+# create an instance of class bike
+# a bike constructor
+bike <- function(type, color) {structure (list(type = type, color = color), class = 'bike')}
+mybike <- bike('cyclocross', 'green')
+class(mybike) 
+```
+
+```{r} 
+# still prints like a list
+mybike 
+```
+
+```{r} 
+# define print for bikes
+print.bike <- function(b) {print(paste0('a rolling thing with ', b$numwheels, ' wheels and ', b$numhandlebars, ' handle bar'))}
+mybike
+```
+
+
+In S3, there are no formal class definitions
+========================================================
+
+&nbsp;
+
+```{r} 
+# what if we just change the class
+class(mybike) <- 'lm'
+# and then print it
+mybike
+```
+
+
+S3 "inheritance" is informal as well
+========================================================
+
+```{r} 
+# create an instance of class bike
+theotherpersonsbike <- structure(list(motor = 1), class = c('e-bike', 'bike'))
+class(theotherpersonsbike) 
+```
 
 
 
