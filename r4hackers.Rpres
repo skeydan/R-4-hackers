@@ -1,11 +1,3 @@
-```{r setup, include=FALSE}
-opts_chunk$set(cache=TRUE)
-opts_chunk$set(out.width='700px', dpi=200)
-opts_chunk$set(fig.align='left')
-library(ggplot2)
-library(GGally)
-library(dplyr)
-```
 <style>
  
 .reveal pre code {
@@ -41,6 +33,17 @@ incremental:true
 Hello World
 ========================================================
 
+```{r setup, include=FALSE}
+opts_chunk$set(cache=TRUE)
+opts_chunk$set(out.width='700px', dpi=200)
+opts_chunk$set(fig.align='left')
+library(ggplot2)
+library(GGally)
+library(dplyr)
+library(forecast)
+library(purrr)
+```
+
 &nbsp;
 
 ... that is, _Data Science Hello World_.
@@ -58,7 +61,7 @@ Sure, first we do data exploration ...
 data(longley)
 head(longley)
 ```
-
+ 
 
 Sure, we visualize...
 ========================================================
@@ -131,20 +134,35 @@ par(mfrow=c(1,1))
 ```
 
 
-... and even do some fancy stuff 
+... and even do some fancy stuff!
 ========================================================
 
 &nbsp;
 
-... like extracting the Akaike Information Criterion
+Like extracting the Akaike Information Criterion ...
 
 ```{r}
 extractAIC(fit)
 ```
 
-&nbsp;
+... get confidence intervals for coefficients...
+
+```{r}
+confint(fit)
+```
+
+... or find high leverage points:
+
+```{r}
+hatvalues(fit)
+```
+
+
 
 Let's see what other objects we can print, plot, get a summary of! 
+========================================================
+
+&nbsp;
 
 
 Data frames
@@ -258,7 +276,7 @@ mybike
 
 ```{r} 
 # define print for bikes
-print.bike <- function(b) {print(paste0('a rolling thing with ', b$numwheels, ' wheels and ', b$numhandlebars, ' handle bar'))}
+print.bike <- function(b) {print(paste0('a ', b$color, ' ', b$type, ' bike'))}
 mybike
 ```
 
@@ -273,6 +291,8 @@ In S3, there are no formal class definitions
 class(mybike) <- 'lm'
 # and then print it
 mybike
+# let's undo this ASAP ;-)
+class(mybike) <- 'bike'
 ```
 
 
@@ -280,18 +300,110 @@ S3 "inheritance" is informal as well
 ========================================================
 
 ```{r} 
-# create an instance of class bike
-theotherpersonsbike <- structure(list(motor = 1), class = c('e-bike', 'bike'))
+ebike <- function(type, color) {
+  parent <- bike(type, color)
+  structure (c(unclass(parent), motor = TRUE), class = c('ebike', class(parent)))}
+
+theotherpersonsbike <-ebike('mountain', 'red')
 class(theotherpersonsbike) 
+theotherpersonsbike
 ```
+
+
+```{r} 
+print.ebike <- function(b) {
+  ptext <- NextMethod()
+  print('... with a motor!')
+}
+theotherpersonsbike
+```
+
+
+S3: Create your own generic
+========================================================
+
+```{r, echo=FALSE} 
+accelerate_until_at <- function(target_speed) {
+  paste('Now accelerating to', target_speed, 'km/h')
+}
+```
+
+```{r} 
+# create a generic function that calls UseMethod to do the dispatching
+speed_up <- function(object, ...) UseMethod("speed_up")
+
+# create an implementation for our bike class
+# implementations must end in .<classname here>
+speed_up.bike <- function(object, target_speed) {
+  accelerate_until_at(target_speed)
+}
+
+speed_up(mybike, target_speed = 33)
+```
+
+```{r} 
+# also of course create an implementation for the e-bike... you've seen it coming
+speed_up.ebike <- function(object, target_speed) {
+  adjusted_speed <- ifelse(target_speed <= 25, target_speed, 25)
+  accelerate_until_at(adjusted_speed)
+}
+
+speed_up(theotherpersonsbike, target_speed = 33)
+```
+
+
+
+S3: What happens if there is no implementation for a class?
+========================================================
+
+
+The default method for a function will be used.
+
+Remember confint() from above?
+
+```{r} 
+# these implementations exist for confint:
+methods('confint')
+
+# now call confint on a fitted timeseries model - there is no implementation
+confint(auto.arima(ts))
+
+# same output when explicitly calling the default implementation
+confint.default(auto.arima(ts))
+```
+
+
+OO wrap-up: Other systems
+========================================================
+
+&nbsp; 
+
+- S4:
+    - more formal than S3 (formal class definitions)
+    - but methods still belong to functions, not classes
+    
+- Reference classes (RC):
+    - methods belong to objects, not functions
+    - objects are mutable (the usual R copy-on-modify semantics do not apply)
+
+
+
+
+On to...
+========================================================
+
+&nbsp; 
+
+functional programming!
 
 
 
 The magic three: map, fold, and filter
 ========================================================
 
-- function in, data out
-- ```map```: map a function over a list of elements
+&nbsp; 
+
+- $map$: map a function over a list of elements
     - in Haskell:
 
 ```
@@ -299,7 +411,7 @@ The magic three: map, fold, and filter
 [2,3,4,5,6,7,8,9,10,11]
 ```
 
-- ```filter```: filter a list of elements according to some predicate
+- $filter$: filter a list of elements according to some predicate
     - in Haskell:
 
 ```
@@ -307,43 +419,44 @@ The magic three: map, fold, and filter
 [2,4,6,8,10]
 ```
 
-- ```fold```: combine values recursively
+- $fold$: combine values recursively (a.k.a. $reduce$ (Clojure, Java, Python...), $apply$ (Scheme, ...))
     - in Haskell:
 
 ```
 λ: foldl (+) 0 [1..10]
 55
 ```
-a.k.a. reduce (Clojure, Java, Python...), apply (Scheme, ...)
 
 
-Mapping in R: meet the family
+
+Mapping in R (1): meet the APPLY family
 ========================================================
 
-- apply, lapply, sapply, vapply, mapply, tapply ... ough
+&nbsp;
+
+- apply, lapply, sapply, vapply, mapply, tapply ... ough!
+
 - What data structure(s) am I working with?
     - one-dimensional?
     - more than one dimension?
     - more than one data structure?
 
 
-The apply family (1): just apply 
+The apply family (1): just ... apply
 ========================================================
 
-Use with more-than-one-dimensional data structures
-    - data.frame
-    - matrix
-    - array
-   
-```{r}
-data("women")
-# apply mean to the dataframe's columns 
-apply(women, 2, mean)
-```
+&nbsp;
 
+Use with more-than-one-dimensional data structures:
+- data.frame
+- matrix
+- array
+   
 ```{r}
 m <- matrix(1:12, nrow = 3, ncol = 4)
 m
+# apply mean to the columns 
+apply(m, 2, mean)
 # apply mean to the rows
 apply(m, 1, mean)
 ```
@@ -356,31 +469,144 @@ Use with one-dimensional stuff (list, vector)
 
 But which of [s|l|t]apply?
 
-lapply: outputs a list
+- lapply: outputs a list
 
 ```{r}
 mychars <- c("a", "b", "c")
 str(lapply(mychars, toupper))
 ```
 
-sapply: simplifies the result
+- sapply: simplifies the result
 
 ```{r}
 mychars <- c("a", "b", "c")
 str(sapply(mychars, toupper))
 ```
 
-vapply: returns requested type
+- vapply: returns requested type
 
 ```{r}
 mychars <- c("a", "b", "c")
-str(vapply(mychars, as.integer, integer(1)))
+str(vapply(mychars, utf8ToInt, integer(1)))
 ```
 
 
-What's the problem with sapply?
+Aside: What's the problem with sapply?
 ========================================================
 
+```{r}
+# a list of 3
+l1 <-list(
+  col1 = "a",
+  col2 = "b",
+  col3 = c("c", "d")
+)
+str(l1)
+
+# a list of 2
+l2 <- l1[1:2]
+str(l2)
+
+# upper case everything
+u1 <- sapply(l1, toupper)
+# result is still a list!
+str(u1)
+
+u2 <- sapply(l2, toupper)
+# result is a vector!
+str(u2)
+``` 
+
+
+Mapping in R (2): Map
+========================================================
+
+&nbsp;
+
+
+Yes, we have them in R, too:
+
+- Map,
+- Filter,
+- and Reduce
+- (plus Find, Negate, and Position)
+
+
+Redoing the magic three, in R
+========================================================
+
+&nbsp;
+
+Map
+
+```{r}
+# same as lapply(1:10, function(x) x+1), but see order of args!
+m <- Map(function(x) x+1, 1:10) 
+```
+
+Filter
+
+```{r}
+# same as lapply(1:10, function(x) x+1), but see order of args!
+Filter(function(x) x %% 2 == 0, 1:10) 
+```
+
+
+Reduce
+
+```{r}
+# same as lapply(1:10, function(x) x+1), but see order of args!
+Reduce(`+`, 1:10) 
+```
+
+
+
+Mapping in R (3): Typesafe mapping with purrr
+========================================================
+
+&nbsp;
+
+```{r}
+m <- map_dbl(1:10, function(x) x+1) 
+# but
+m2 <- map_dbl(letters[1:3], toupper)
+```
+
+So ... what is purrr? ![](purrr.png)  
+
+- functional programming package for R, by Hadley Wickham
+- not just the "big three"..
+
+
+Functional programming with purrr (examples)
+========================================================
+
+Too verbose?
+
+```{r}
+m <- map_dbl(1:10, function(x) x+1) 
+```
+
+How about:
+
+```{r}
+m <- map_dbl(1:10, partial(`+`,1)) 
+```
+
+Or, how about function composition?
+
+```{r}
+inttolower <- compose(tolower, intToUtf8)
+inttolower(65:68)
+```
+
+
+OK. Time go get in deeper ...
+========================================================
+
+We've seen objects, we've seen functions.
+
+But how does R _basically_ work?
 
 
 Object types: class(), typeof(), mode() ... oh my!

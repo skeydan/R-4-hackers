@@ -139,17 +139,35 @@ l2[2]
 str(l2[2])
 typeof(l2[2])
 
+#compare
+l2[[2]][[1]] # single element
+l2[[2]][1] # list of 1
+l2[2][1] # list of lists
+
 
 # ----------------------------#
 #   sapply            etc.    #
 #-----------------------------#
 
-l <-list(
+l1 <-list(
   col1 = "a",
   col2 = "b",
   col3 = c("c", "d")
 )
-l
+l1
+str(l1)
+
+l2 <- l1[1:2]
+l2
+str(l2)
+
+u1 <- sapply(l1, toupper)
+str(u1)
+
+u2 <- sapply(l2, toupper)
+str(u2)
+
+
 
 
 
