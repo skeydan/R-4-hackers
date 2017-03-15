@@ -25,10 +25,6 @@ sapply(tests1, class)
 sapply(tests1, typeof)
 sapply(tests1, print)
 
-# eval = .Internal(eval(expr, envir, enclos))
-# .Internal = built into the R interpreter
-# names.c ---> show how lookup table looks...
-# eval.c show eval function!
 
 # expressions and calls
 # an R expression vector is a list of calls, symbols etc, for example as returned by parse
@@ -100,13 +96,17 @@ b
 is.call(b)
 eval(b)
 
-### eval ###
-# arguments may or may not be quoted
+### call + eval ###
 y <- 10.5
-call("round", y)       
-call("round", quote(y)) 
-eval(call("round", y))
-eval(call("round", quote(y)))
+e1 <- call("round", y)       
+e2 <- call("round", quote(y)) 
+
+e1
+e2
+
+rm(y)
+eval(e1)
+eval(e2)
 
 
 # ----------------------------#

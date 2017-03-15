@@ -35,8 +35,10 @@ Hello World
 
 ```{r setup, include=FALSE}
 opts_chunk$set(cache=TRUE)
-opts_chunk$set(out.width='700px', dpi=200)
 opts_chunk$set(fig.align='left')
+```
+
+```{r}
 library(ggplot2)
 library(GGally)
 library(dplyr)
@@ -569,10 +571,14 @@ Mapping in R (3): Typesafe mapping with purrr
 ```{r}
 m <- map_dbl(1:10, function(x) x+1) 
 # but
-m2 <- map_dbl(letters[1:3], toupper)
+m2 <- map_chr(letters[1:3], toupper)
 ```
 
-So ... what is purrr? ![](purrr.png)  
+&nbsp;
+
+So ... what is purrr?
+
+![](purrr.png)  
 
 - functional programming package for R, by Hadley Wickham
 - not just the "big three"..
@@ -580,6 +586,8 @@ So ... what is purrr? ![](purrr.png)
 
 Functional programming with purrr (examples)
 ========================================================
+
+&nbsp;
 
 Too verbose?
 
@@ -604,6 +612,8 @@ inttolower(65:68)
 OK. Time go get in deeper ...
 ========================================================
 
+&nbsp;
+
 We've seen objects, we've seen functions.
 
 But how does R _basically_ work?
@@ -612,6 +622,7 @@ But how does R _basically_ work?
 Object types: class(), typeof(), mode() ... oh my!
 ========================================================
 
+&nbsp;
 
 Just wanna use R? Use _class()_:
 
@@ -632,6 +643,8 @@ Even though they do such different things as
 typeof() tells about the internal object type:
 ========================================================
 
+&nbsp;
+
 ```{r}
 tests1 <- c(`<-`, `if`, `[`, length, c, sum, nrow, eval, myfunc)
 sapply(tests1, typeof)
@@ -647,7 +660,9 @@ So we have three different corresponding object types:
 Closures (1)
 ========================================================
 
-Every user-defined function will be a closure.
+&nbsp;
+
+Every user-defined function is a closure.
 
 With closures, we can conveniently print the source code on the console:
 
@@ -659,6 +674,8 @@ nrow
 Closures (2)
 ========================================================
 
+&nbsp;
+
 Closures have formals, a body, and an associated environment.
 
 ```{r}
@@ -669,9 +686,7 @@ c(formals(myfunc), body(myfunc), environment(myfunc))
 Let's try this with eval!
 ========================================================
 
-```{r}
-formals(eval)
-```
+&nbsp;
 
 ```{r}
 body(eval)
@@ -679,9 +694,47 @@ body(eval)
 
 Oops!
 
-####TBD###
-# eval = .Internal(eval(expr, envir, enclos))
-# .Internal = built into the R interpreter
-# names.c ---> show how lookup table looks...
-# eval.c show eval function!
+So, for the .Internals...
+========================================================
+
+&nbsp;
+
+For .Internal and .Primitive functions (the "builtins" above),
+
+__$R_source/src/main/names.c__ 
+
+contains the mapping to the corresponding C function:
+
+
+![](names.c.png)  
+
+
+And this is (the beginning of) do_eval
+========================================================
+
+&nbsp;
+
+![](do_eval.png) 
+
+Notice something?
+
+
+
+Yes. There's some LISP in there
+========================================================
+
+&nbsp;
+
+Not just the CARs, CADRs, CADDRs... 
+
+... S-expressions...
+
+... the whole handling of environments/lexical scoping/closures is modeled after Lisp.
+
+(No time now and here, but there's always SICP...)
+
+
+What's so special about specials?
+========================================================
+
 
