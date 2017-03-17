@@ -38,7 +38,7 @@ opts_chunk$set(cache=TRUE)
 opts_chunk$set(fig.align='left')
 ```
 
-```{r}
+```{r, echo=FALSE}
 library(ggplot2)
 library(GGally)
 library(dplyr)
@@ -52,12 +52,12 @@ library(purrr)
 
 
 
-We have some data!
+We got some data...
 ========================================================
 
 &nbsp;
 
-Sure, first we do data exploration ...
+Sure, first we do data exploration.
 
 ```{r}
 data(longley)
@@ -75,7 +75,7 @@ ggpairs(longley)
 ```
 
 
-And then: Hello World
+But then: Hello World!
 ========================================================
 
 &nbsp;
@@ -132,11 +132,11 @@ We can plot it...
 ```{r}
 par(mfrow=c(2,2))
 plot(fit)
-par(mfrow=c(1,1))
+dev.off()
 ```
 
 
-... and even do some fancy stuff!
+And even do some fancy stuff.
 ========================================================
 
 &nbsp;
@@ -147,16 +147,10 @@ Like extracting the Akaike Information Criterion ...
 extractAIC(fit)
 ```
 
-... get confidence intervals for coefficients...
+Or getting confidence intervals for coefficients.
 
 ```{r}
 confint(fit)
-```
-
-... or find high leverage points:
-
-```{r}
-hatvalues(fit)
 ```
 
 
@@ -167,7 +161,7 @@ Let's see what other objects we can print, plot, get a summary of!
 &nbsp;
 
 
-Data frames
+Data frames (1)
 ========================================================
 
 &nbsp;
@@ -179,7 +173,7 @@ summary(df)
 ```
 
 
-Data frames
+Data frames (2)
 ========================================================
 
 &nbsp;
@@ -189,7 +183,7 @@ plot(df)
 ```
 
 
-Time series objects
+Time series objects (1)
 ========================================================
 
 &nbsp;
@@ -201,7 +195,7 @@ summary(ts)
 ```
 
 
-Time series objects
+Time series objects (2)
 ========================================================
 
 &nbsp;
@@ -264,9 +258,10 @@ In S3, there are no formal class definitions
 &nbsp;
 
 ```{r} 
-# create an instance of class bike
 # a bike constructor
 bike <- function(type, color) {structure (list(type = type, color = color), class = 'bike')}
+
+# create an instance of class bike
 mybike <- bike('cyclocross', 'green')
 class(mybike) 
 ```
@@ -276,17 +271,24 @@ class(mybike)
 mybike 
 ```
 
+Define a print method for bikes
+========================================================
+
+&nbsp;
+
 ```{r} 
-# define print for bikes
+# methods are called <funcname>.<classname>
 print.bike <- function(b) {print(paste0('a ', b$color, ' ', b$type, ' bike'))}
 mybike
 ```
 
 
-In S3, there are no formal class definitions
+With S3, you could shoot yourself in the foot...
 ========================================================
 
 &nbsp;
+
+... or just leave it be.
 
 ```{r} 
 # what if we just change the class
@@ -295,6 +297,8 @@ class(mybike) <- 'lm'
 mybike
 # let's undo this ASAP ;-)
 class(mybike) <- 'bike'
+# and nothing's broken
+mybike
 ```
 
 
@@ -335,7 +339,6 @@ accelerate_until_at <- function(target_speed) {
 speed_up <- function(object, ...) UseMethod("speed_up")
 
 # create an implementation for our bike class
-# implementations must end in .<classname here>
 speed_up.bike <- function(object, target_speed) {
   accelerate_until_at(target_speed)
 }
@@ -344,9 +347,9 @@ speed_up(mybike, target_speed = 33)
 ```
 
 ```{r} 
-# also of course create an implementation for the e-bike... you've seen it coming
+# also of course create an implementation for the e-bike
 speed_up.ebike <- function(object, target_speed) {
-  adjusted_speed <- ifelse(target_speed <= 25, target_speed, 25)
+  adjusted_speed <- ifelse(target_speed <= 25, target_speed, 25) # ... you've seen that coming
   accelerate_until_at(adjusted_speed)
 }
 
@@ -358,6 +361,7 @@ speed_up(theotherpersonsbike, target_speed = 33)
 S3: What happens if there is no implementation for a class?
 ========================================================
 
+&nbsp; 
 
 The default method for a function will be used.
 
@@ -366,13 +370,16 @@ Remember confint() from above?
 ```{r} 
 # these implementations exist for confint:
 methods('confint')
-
-# now call confint on a fitted timeseries model - there is no implementation
-confint(auto.arima(ts))
-
-# same output when explicitly calling the default implementation
-confint.default(auto.arima(ts))
 ```
+
+```{r} 
+data("lynx")
+fit <- auto.arima(lynx)
+# same as explicitly calling confint.default
+confint(fit)
+
+```
+
 
 
 OO wrap-up: Other systems
@@ -400,30 +407,26 @@ functional programming!
 
 
 
-The magic three: map, fold, and filter
+The Magic Three: map, fold, and filter
 ========================================================
 
 &nbsp; 
 
-- $map$: map a function over a list of elements
-    - in Haskell:
+Magic Three in Haskell:
 
+- $map$: map a function over a list of elements
 ```
 λ: map (+1) [1..10]
 [2,3,4,5,6,7,8,9,10,11]
 ```
 
 - $filter$: filter a list of elements according to some predicate
-    - in Haskell:
-
 ```
 λ: filter even [1..10]
 [2,4,6,8,10]
 ```
 
 - $fold$: combine values recursively (a.k.a. $reduce$ (Clojure, Java, Python...), $apply$ (Scheme, ...))
-    - in Haskell:
-
 ```
 λ: foldl (+) 0 [1..10]
 55
@@ -438,7 +441,7 @@ Mapping in R (1): meet the APPLY family
 
 - apply, lapply, sapply, vapply, mapply, tapply ... ough!
 
-- What data structure(s) am I working with?
+- Basic question: What data structure(s) am I working with?
     - one-dimensional?
     - more than one dimension?
     - more than one data structure?
@@ -449,10 +452,7 @@ The apply family (1): just ... apply
 
 &nbsp;
 
-Use with more-than-one-dimensional data structures:
-- data.frame
-- matrix
-- array
+Use with more-than-one-dimensional data structures: data.frame, matrix, array
    
 ```{r}
 m <- matrix(1:12, nrow = 3, ncol = 4)
@@ -469,32 +469,30 @@ The apply family (2): lapply and friends
 
 Use with one-dimensional stuff (list, vector)
 
-But which of [s|l|t]apply?
-
 - lapply: outputs a list
 
 ```{r}
-mychars <- c("a", "b", "c")
-str(lapply(mychars, toupper))
+mychars <- c("a", "b"); str(lapply(mychars, toupper))
 ```
 
 - sapply: simplifies the result
 
 ```{r}
-mychars <- c("a", "b", "c")
-str(sapply(mychars, toupper))
+mychars <- c("a", "b"); str(sapply(mychars, toupper))
 ```
 
 - vapply: returns requested type
 
 ```{r}
-mychars <- c("a", "b", "c")
-str(vapply(mychars, utf8ToInt, integer(1)))
+mychars <- c("a", "b"); str(vapply(mychars, utf8ToInt, integer(1)))
 ```
 
 
-Aside: What's the problem with sapply?
+Aside: What's the problem with sapply? (1)
 ========================================================
+
+
+&nbsp; 
 
 ```{r}
 # a list of 3
@@ -508,7 +506,14 @@ str(l1)
 # a list of 2
 l2 <- l1[1:2]
 str(l2)
+```
 
+Aside: What's the problem with sapply? (2)
+========================================================
+
+&nbsp; 
+
+```{r}
 # upper case everything
 u1 <- sapply(l1, toupper)
 # result is still a list!
@@ -528,13 +533,13 @@ Mapping in R (2): Map
 
 Yes, we have them in R, too:
 
-- Map,
-- Filter,
-- and Reduce
+- Map
+- Filter
+- Reduce
 - (plus Find, Negate, and Position)
 
 
-Redoing the magic three, in R
+Redoing the Magic Three, in R
 ========================================================
 
 &nbsp;
@@ -581,7 +586,7 @@ So ... what is purrr?
 ![](purrr.png)  
 
 - functional programming package for R, by Hadley Wickham
-- not just the "big three"..
+- not just the "big three"...
 
 
 Functional programming with purrr (examples)
@@ -595,7 +600,7 @@ Too verbose?
 m <- map_dbl(1:10, function(x) x+1) 
 ```
 
-How about:
+How about partial application:
 
 ```{r}
 m <- map_dbl(1:10, partial(`+`,1)) 
@@ -609,14 +614,14 @@ inttolower(65:68)
 ```
 
 
-OK. Time go get in deeper ...
+OK. Time for the real internals ...
 ========================================================
 
 &nbsp;
 
 We've seen objects, we've seen functions.
 
-But how does R _basically_ work?
+But what's R _basically_ made of?
 
 
 Object types: class(), typeof(), mode() ... oh my!
@@ -687,6 +692,8 @@ Let's try this with eval!
 ========================================================
 
 &nbsp;
+
+(Remember, this was a closure, too.)
 
 ```{r}
 body(eval)
