@@ -57,7 +57,7 @@ We got some data...
 
 &nbsp;
 
-Sure, first we do data exploration.
+Sure, first we ALWAYS do some data exploration.
 
 ```{r}
 data(longley)
@@ -65,7 +65,7 @@ head(longley)
 ```
  
 
-Sure, we visualize...
+Sure, first we ALWAYS visualize...
 ========================================================
 
 &nbsp;
@@ -288,7 +288,7 @@ With S3, you could shoot yourself in the foot...
 
 &nbsp;
 
-... or just leave it be.
+... or just ... don't.
 
 ```{r} 
 # what if we just change the class
@@ -736,12 +736,81 @@ Not just the CARs, CADRs, CADDRs...
 
 ... S-expressions...
 
-... the whole handling of environments/lexical scoping/closures is modeled after Lisp.
+... the whole idea of environments and closures in current R is modeled after Lisp.
 
-(No time now and here, but there's always SICP...)
+(No time now and here, but there's always SICP to read up on environments etc.)
+
+![](sicp.jpg) 
 
 
 What's so special about specials?
 ========================================================
 
+&nbsp;
 
+Specials get their arguments passed in quoted and decide themselves when to evaluate what.
+
+What do you think will happen here?
+
+```{r}
+# no confint.bike defined for bikes -> confint.default will get called
+# but confint.default needs some other methods that do not exist
+if(1 > 0) 1 else confint(mybike)
+```
+
+Just so you believe me an error _would_ get generated if confint(mybike) were called.
+
+```{r, error=TRUE}
+confint(mybike)
+```
+
+
+
+I promise you (1)
+========================================================
+
+&nbsp;
+
+Here we have a user-defined function, f. What will happen?
+
+```{r, error=TRUE}
+f <- function(exp1, exp2) {
+  exp1
+}
+
+f(confint(mybike), f)
+f(123, confint(mybike))
+```
+
+&nbsp;
+
+Closures evaluate their arguments lazily (by need).
+
+I promise you (2)
+========================================================
+
+&nbsp;
+
+
+As users, we can create _promises_, too:
+
+```{r, error=TRUE}
+# normal assignment - this can't work
+x <- confint(mybike)
+
+# promise to evaluate when needed
+# this works without error
+delayedAssign('x', confint(mybike))
+
+# here it gets evaluated
+x
+```
+
+You promise me?
+========================================================
+
+&nbsp;
+
+... to give feedback?
+
+Thanks a lot for your interest! :-)
